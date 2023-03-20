@@ -1,0 +1,42 @@
+name: the-great-releaser
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y lua5.1 libmagickwand-dev
+
+    - name: Build release
+      run: |
+        tar -czf walua.tar.gz wal.lua
+
+    - name: Create release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          Changes in this release:
+          - Bugfixes
+          - New features
+        draft: false
+        prerelease: false
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: walua
+        path: walua.tar.gz
+
